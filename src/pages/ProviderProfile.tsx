@@ -24,25 +24,10 @@ const ProviderProfile = () => {
   const provider = providerId ? getProviderById(providerId) : null;
   const contentRef = useRef<HTMLDivElement>(null);
 
-  if (!provider) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <div className="flex-grow flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Provider Not Found</h1>
-            <Button onClick={() => navigate('/providers')} className="bg-wellness-600 hover:bg-wellness-700">
-              Back to Directory
-            </Button>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
   // Animation on mount
   useEffect(() => {
+    if (!provider) return;
+
     const observerOptions = {
       threshold: 0.1,
       rootMargin: "0px 0px -50px 0px"
@@ -64,16 +49,34 @@ const ProviderProfile = () => {
       observerOptions
     );
 
-    if (contentRef.current) {
-      observer.observe(contentRef.current);
+    const currentContent = contentRef.current;
+    if (currentContent) {
+      observer.observe(currentContent);
     }
 
     return () => {
-      if (contentRef.current) {
-        observer.unobserve(contentRef.current);
+      if (currentContent) {
+        observer.unobserve(currentContent);
       }
     };
-  }, []);
+  }, [provider]);
+
+  if (!provider) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="flex-grow flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">Provider Not Found</h1>
+            <Button onClick={() => navigate('/providers')} className="bg-wellness-600 hover:bg-wellness-700">
+              Back to Directory
+            </Button>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   // Mock reviews
   const reviews = [

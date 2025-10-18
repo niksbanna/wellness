@@ -24,8 +24,20 @@ import { getProviderById } from '@/lib/providers';
 import { cn } from '@/lib/utils';
 import { format, addDays } from 'date-fns';
 
+// Appointment data interface
+interface AppointmentData {
+  providerId: string;
+  date: Date;
+  time: string;
+  type: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone: string;
+  reason: string;
+}
+
 // Simulated API function
-const bookAppointment = async (data: any) => {
+const bookAppointment = async (data: AppointmentData) => {
   await new Promise(resolve => setTimeout(resolve, 1500));
   if (Math.random() < 0.05) {
     throw new Error('Failed to book appointment. Please try again.');

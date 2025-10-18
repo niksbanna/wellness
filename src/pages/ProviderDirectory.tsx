@@ -66,19 +66,22 @@ const ProviderDirectory = () => {
       observerOptions
     );
 
-    if (heroRef.current) {
-      observer.observe(heroRef.current);
+    const currentHero = heroRef.current;
+    const currentGrid = gridRef.current;
+
+    if (currentHero) {
+      observer.observe(currentHero);
     }
-    if (gridRef.current) {
-      observer.observe(gridRef.current);
+    if (currentGrid) {
+      observer.observe(currentGrid);
     }
 
     return () => {
-      if (heroRef.current) {
-        observer.unobserve(heroRef.current);
+      if (currentHero) {
+        observer.unobserve(currentHero);
       }
-      if (gridRef.current) {
-        observer.unobserve(gridRef.current);
+      if (currentGrid) {
+        observer.unobserve(currentGrid);
       }
     };
   }, []);

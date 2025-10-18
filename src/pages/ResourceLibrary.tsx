@@ -27,7 +27,7 @@ const ResourceLibrary = () => {
     { value: 'success-stories', label: 'Success Stories' },
   ];
 
-  const types: { value: ResourceType | 'all'; label: string; icon: any }[] = [
+  const types: { value: ResourceType | 'all'; label: string; icon: React.ElementType }[] = [
     { value: 'all', label: 'All Types', icon: BookOpen },
     { value: 'blog', label: 'Blog Posts', icon: Newspaper },
     { value: 'guide', label: 'Guides', icon: FileText },
@@ -75,13 +75,14 @@ const ResourceLibrary = () => {
       observerOptions
     );
 
-    if (heroRef.current) {
-      observer.observe(heroRef.current);
+    const currentHero = heroRef.current;
+    if (currentHero) {
+      observer.observe(currentHero);
     }
 
     return () => {
-      if (heroRef.current) {
-        observer.unobserve(heroRef.current);
+      if (currentHero) {
+        observer.unobserve(currentHero);
       }
     };
   }, []);

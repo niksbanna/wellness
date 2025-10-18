@@ -19,13 +19,13 @@ const PricingCalculator = () => {
   const [heightFeet, setHeightFeet] = useState('');
   const [heightInches, setHeightInches] = useState('');
   const [bmi, setBMI] = useState<number>(0);
-  const [bmiData, setBMIData] = useState<any>(null);
+  const [bmiData, setBMIData] = useState<ReturnType<typeof getBMICategory> | null>(null);
   const [hasInsurance, setHasInsurance] = useState<boolean>(false);
   const [insuranceType, setInsuranceType] = useState<'commercial' | 'medicare' | 'medicaid' | 'none'>('none');
   const [medicationType, setMedicationType] = useState<'semaglutide' | 'tirzepatide' | 'liraglutide'>('semaglutide');
   const [programTier, setProgramTier] = useState<'basic' | 'standard' | 'premium'>('standard');
   const [duration, setDuration] = useState<3 | 6 | 12>(6);
-  const [estimate, setEstimate] = useState<any>(null);
+  const [estimate, setEstimate] = useState<ReturnType<typeof calculatePricing> | null>(null);
   const [hasHealthConditions, setHasHealthConditions] = useState(false);
 
   // Calculate BMI when inputs change
@@ -199,7 +199,7 @@ const PricingCalculator = () => {
                   </Alert>
                 )}
 
-                <RadioGroup value={programTier} onValueChange={(val: any) => setProgramTier(val)}>
+                <RadioGroup value={programTier} onValueChange={(val: 'basic' | 'standard' | 'premium') => setProgramTier(val)}>
                   <div className="space-y-4">
                     {programTiers.map((program) => (
                       <div
@@ -209,7 +209,7 @@ const PricingCalculator = () => {
                             ? 'border-wellness-600 bg-wellness-50'
                             : 'border-gray-200 hover:border-wellness-300'
                         }`}
-                        onClick={() => setProgramTier(program.id as any)}
+                        onClick={() => setProgramTier(program.id as 'basic' | 'standard' | 'premium')}
                       >
                         <div className="flex items-start gap-3">
                           <RadioGroupItem value={program.id} id={program.id} className="mt-1" />
@@ -272,7 +272,7 @@ const PricingCalculator = () => {
                 {hasInsurance && (
                   <div className="space-y-2">
                     <Label htmlFor="insurance-type">Insurance Type</Label>
-                    <Select value={insuranceType} onValueChange={(val: any) => setInsuranceType(val)}>
+                    <Select value={insuranceType} onValueChange={(val: 'commercial' | 'medicare' | 'medicaid' | 'none') => setInsuranceType(val)}>
                       <SelectTrigger id="insurance-type">
                         <SelectValue placeholder="Select insurance type" />
                       </SelectTrigger>
@@ -287,7 +287,7 @@ const PricingCalculator = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="medication">Preferred Medication</Label>
-                  <Select value={medicationType} onValueChange={(val: any) => setMedicationType(val)}>
+                  <Select value={medicationType} onValueChange={(val: 'semaglutide' | 'tirzepatide' | 'liraglutide') => setMedicationType(val)}>
                     <SelectTrigger id="medication">
                       <SelectValue placeholder="Select medication" />
                     </SelectTrigger>
@@ -304,7 +304,7 @@ const PricingCalculator = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="duration">Commitment Duration</Label>
-                  <Select value={duration.toString()} onValueChange={(val) => setDuration(parseInt(val) as any)}>
+                  <Select value={duration.toString()} onValueChange={(val) => setDuration(parseInt(val) as 3 | 6 | 12)}>
                     <SelectTrigger id="duration">
                       <SelectValue placeholder="Select duration" />
                     </SelectTrigger>
