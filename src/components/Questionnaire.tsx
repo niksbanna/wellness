@@ -1,8 +1,11 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, Send, CheckCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Send, CheckCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import AnimatedSplash from './AnimatedSplash';
+import { useMutation } from '@tanstack/react-query';
+import { submitQuestionnaire, QuestionnaireData } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
 
 // Question types for our questionnaire
 type QuestionType = {
@@ -86,6 +89,28 @@ const Questionnaire = () => {
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [submitted, setSubmitted] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
+  const { toast } = useToast();
+
+  // TanStack Query mutation for form submission
+  const mutation = useMutation({
+    mutationFn: submitQuestionnaire,
+    onSuccess: (data) => {
+      setSubmitted(true);
+      toast({
+        title: 'Success!',
+        description: data.message,
+        duration: 5000,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Submission Failed',
+        description: error.message || 'An error occurred while submitting your assessment. Please try again.',
+        variant: 'destructive',
+        duration: 5000,
+      });
+    },
+  });
 
   // Form validation
   const isCurrentQuestionAnswered = () => {
@@ -155,8 +180,19 @@ const Questionnaire = () => {
 
   // Handle form submission
   const handleSubmit = () => {
-    console.log("Questionnaire submitted:", answers);
-    setSubmitted(true);
+    // Transform answers to match API interface
+    const questionnaireData: QuestionnaireData = {
+      name: answers.name || '',
+      age: answers.age || 0,
+      gender: answers.gender || '',
+      weight: answers.weight || 0,
+      height: answers.height || 0,
+      goal: answers.goal || '',
+      health_conditions: answers.health_conditions || [],
+      medications: answers.medications || '',
+    };
+
+    mutation.mutate(questionnaireData);
   };
 
   // Animation and scroll handling
@@ -343,27 +379,32 @@ const Questionnaire = () => {
               </div>
               
               <div className="flex justify-between">
-                <button 
+                <button
                   onClick={prevQuestion}
-                  disabled={currentQuestion === 0}
+                  disabled={currentQuestion === 0 || mutation.isPending}
                   className={cn(
                     "flex items-center gap-2 btn-secondary",
-                    currentQuestion === 0 && "opacity-50 cursor-not-allowed"
+                    (currentQuestion === 0 || mutation.isPending) && "opacity-50 cursor-not-allowed"
                   )}
                 >
                   <ArrowLeft size={18} /> Previous
                 </button>
-                
-                <button 
+
+                <button
                   onClick={nextQuestion}
-                  disabled={!isCurrentQuestionAnswered()}
+                  disabled={!isCurrentQuestionAnswered() || mutation.isPending}
                   className={cn(
                     "flex items-center gap-2",
                     currentQuestion === questions.length - 1 ? "btn-primary" : "btn-primary",
-                    !isCurrentQuestionAnswered() && "opacity-50 cursor-not-allowed"
+                    (!isCurrentQuestionAnswered() || mutation.isPending) && "opacity-50 cursor-not-allowed"
                   )}
                 >
-                  {currentQuestion === questions.length - 1 ? (
+                  {mutation.isPending ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      Submitting...
+                    </>
+                  ) : currentQuestion === questions.length - 1 ? (
                     <>
                       Submit <Send size={18} />
                     </>
