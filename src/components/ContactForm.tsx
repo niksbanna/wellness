@@ -1,8 +1,11 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Mail, Phone, MapPin, Send, CheckCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, CheckCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import AnimatedSplash from './AnimatedSplash';
+import { useMutation } from '@tanstack/react-query';
+import { submitContactForm, ContactFormData } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +16,28 @@ const ContactForm = () => {
   });
   const [submitted, setSubmitted] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
+  const { toast } = useToast();
+
+  // TanStack Query mutation for form submission
+  const mutation = useMutation({
+    mutationFn: submitContactForm,
+    onSuccess: (data) => {
+      setSubmitted(true);
+      toast({
+        title: 'Message Sent!',
+        description: data.message,
+        duration: 5000,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Failed to Send',
+        description: error.message || 'An error occurred while sending your message. Please try again.',
+        variant: 'destructive',
+        duration: 5000,
+      });
+    },
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -24,8 +49,15 @@ const ContactForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    setSubmitted(true);
+
+    const contactData: ContactFormData = {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      message: formData.message,
+    };
+
+    mutation.mutate(contactData);
   };
 
   useEffect(() => {
@@ -149,8 +181,24 @@ const ContactForm = () => {
                   />
                 </div>
                 
-                <button type="submit" className="btn-primary w-full flex items-center justify-center gap-2">
-                  Send Message <Send size={18} />
+                <button
+                  type="submit"
+                  disabled={mutation.isPending}
+                  className={cn(
+                    "btn-primary w-full flex items-center justify-center gap-2",
+                    mutation.isPending && "opacity-50 cursor-not-allowed"
+                  )}
+                >
+                  {mutation.isPending ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      Send Message <Send size={18} />
+                    </>
+                  )}
                 </button>
                 
                 <p className="text-xs text-center text-foreground/50">

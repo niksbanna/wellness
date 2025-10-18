@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Linkedin, Mail } from 'lucide-react';
 
 const Footer = () => {
@@ -40,12 +41,12 @@ const Footer = () => {
           <div>
             <h3 className="font-display font-semibold text-lg mb-4">Quick Links</h3>
             <ul className="space-y-3">
-              <li><a href="#how-it-works" className="text-foreground/70 hover:text-wellness-600 transition-colors">How It Works</a></li>
-              <li><a href="#journey" className="text-foreground/70 hover:text-wellness-600 transition-colors">Your Journey</a></li>
-              <li><a href="#testimonials" className="text-foreground/70 hover:text-wellness-600 transition-colors">Success Stories</a></li>
-              <li><a href="#" className="text-foreground/70 hover:text-wellness-600 transition-colors">About Us</a></li>
-              <li><a href="#" className="text-foreground/70 hover:text-wellness-600 transition-colors">Our Physicians</a></li>
+              <li><Link to="/how-it-works" className="text-foreground/70 hover:text-wellness-600 transition-colors">How It Works</Link></li>
+              <li><Link to="/providers" className="text-foreground/70 hover:text-wellness-600 transition-colors">Our Providers</Link></li>
+              <li><Link to="/success-stories" className="text-foreground/70 hover:text-wellness-600 transition-colors">Success Stories</Link></li>
+              <li><Link to="/resources" className="text-foreground/70 hover:text-wellness-600 transition-colors">Resource Library</Link></li>
               <li><a href="#contact" className="text-foreground/70 hover:text-wellness-600 transition-colors">Contact Us</a></li>
+              <li><Link to="/login" className="text-foreground/70 hover:text-wellness-600 transition-colors">Member Login</Link></li>
             </ul>
           </div>
           
@@ -53,12 +54,12 @@ const Footer = () => {
           <div>
             <h3 className="font-display font-semibold text-lg mb-4">Resources</h3>
             <ul className="space-y-3">
-              <li><a href="#" className="text-foreground/70 hover:text-wellness-600 transition-colors">Weight Loss FAQ</a></li>
-              <li><a href="#" className="text-foreground/70 hover:text-wellness-600 transition-colors">Prescription Information</a></li>
-              <li><a href="#" className="text-foreground/70 hover:text-wellness-600 transition-colors">Medical Blog</a></li>
-              <li><a href="#" className="text-foreground/70 hover:text-wellness-600 transition-colors">Nutrition Guidelines</a></li>
-              <li><a href="#" className="text-foreground/70 hover:text-wellness-600 transition-colors">Exercise Recommendations</a></li>
-              <li><a href="#" className="text-foreground/70 hover:text-wellness-600 transition-colors">Success Stories</a></li>
+              <li><Link to="/resources/weight-loss-faq" className="text-foreground/70 hover:text-wellness-600 transition-colors">Weight Loss FAQ</Link></li>
+              <li><Link to="/resources/understanding-glp1-medications" className="text-foreground/70 hover:text-wellness-600 transition-colors">GLP-1 Medications Guide</Link></li>
+              <li><Link to="/resources/nutrition-guide-weight-loss" className="text-foreground/70 hover:text-wellness-600 transition-colors">Nutrition Guidelines</Link></li>
+              <li><Link to="/resources/exercise-recommendations-beginners" className="text-foreground/70 hover:text-wellness-600 transition-colors">Exercise Guide</Link></li>
+              <li><Link to="/resources/mental-health-weight-loss-journey" className="text-foreground/70 hover:text-wellness-600 transition-colors">Mental Health & Weight Loss</Link></li>
+              <li><Link to="/resources" className="text-foreground/70 hover:text-wellness-600 transition-colors font-semibold">View All Resources →</Link></li>
             </ul>
           </div>
           
