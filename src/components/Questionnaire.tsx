@@ -86,7 +86,7 @@ const questions: QuestionType[] = [
 
 const Questionnaire = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [answers, setAnswers] = useState<Record<string, string | number | string[]>>({});
   const [submitted, setSubmitted] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const { toast } = useToast();
@@ -144,7 +144,7 @@ const Questionnaire = () => {
   };
 
   // Handle answer updates
-  const handleAnswer = (value: any) => {
+  const handleAnswer = (value: string | number | string[]) => {
     const question = questions[currentQuestion];
     setAnswers({
       ...answers,
@@ -213,13 +213,14 @@ const Questionnaire = () => {
       { threshold: 0.1, rootMargin: "0px 0px -100px 0px" }
     );
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
+    const currentSection = sectionRef.current;
+    if (currentSection) {
+      observer.observe(currentSection);
     }
 
     return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
+      if (currentSection) {
+        observer.unobserve(currentSection);
       }
     };
   }, []);
@@ -290,36 +291,39 @@ const Questionnaire = () => {
       case 'checkbox':
         return (
           <div className="space-y-3">
-            {question.options?.map((option) => (
-              <label 
-                key={option} 
-                className={cn(
-                  "flex items-center p-4 border rounded-lg cursor-pointer transition-all",
-                  answers[question.id]?.includes(option)
-                    ? "border-wellness-500 bg-wellness-50 ring-2 ring-wellness-200"
-                    : "border-border hover:border-wellness-300"
-                )}
-              >
-                <input 
-                  type="checkbox"
-                  name={question.id}
-                  checked={answers[question.id]?.includes(option) || false}
-                  onChange={() => handleCheckboxChange(option)}
-                  className="sr-only"
-                />
-                <div className={cn(
-                  "w-5 h-5 rounded border-2 flex items-center justify-center mr-3 transition-all",
-                  answers[question.id]?.includes(option)
-                    ? "border-wellness-500 bg-wellness-500"
-                    : "border-border"
-                )}>
-                  {answers[question.id]?.includes(option) && (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            {question.options?.map((option) => {
+              const answerArray = Array.isArray(answers[question.id]) ? answers[question.id] as string[] : [];
+              return (
+                <label
+                  key={option}
+                  className={cn(
+                    "flex items-center p-4 border rounded-lg cursor-pointer transition-all",
+                    answerArray.includes(option)
+                      ? "border-wellness-500 bg-wellness-50 ring-2 ring-wellness-200"
+                      : "border-border hover:border-wellness-300"
                   )}
-                </div>
-                <span>{option}</span>
-              </label>
-            ))}
+                >
+                  <input
+                    type="checkbox"
+                    name={question.id}
+                    checked={answerArray.includes(option)}
+                    onChange={() => handleCheckboxChange(option)}
+                    className="sr-only"
+                  />
+                  <div className={cn(
+                    "w-5 h-5 rounded border-2 flex items-center justify-center mr-3 transition-all",
+                    answerArray.includes(option)
+                      ? "border-wellness-500 bg-wellness-500"
+                      : "border-border"
+                  )}>
+                    {answerArray.includes(option) && (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    )}
+                  </div>
+                  <span>{option}</span>
+                </label>
+              );
+            })}
           </div>
         );
       

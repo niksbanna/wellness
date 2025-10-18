@@ -33,13 +33,14 @@ const ProgramComparison = () => {
       observerOptions
     );
 
-    if (contentRef.current) {
-      observer.observe(contentRef.current);
+    const currentContent = contentRef.current;
+    if (currentContent) {
+      observer.observe(currentContent);
     }
 
     return () => {
-      if (contentRef.current) {
-        observer.unobserve(contentRef.current);
+      if (currentContent) {
+        observer.unobserve(currentContent);
       }
     };
   }, []);
