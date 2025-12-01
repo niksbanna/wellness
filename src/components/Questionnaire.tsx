@@ -269,11 +269,6 @@ const Questionnaire = () => {
     return answer !== undefined && answer !== '';
   };
 
-  // Check if current answer is valid (no validation errors)
-  const isCurrentAnswerValid = (): boolean => {
-    return validateCurrentAnswer() === null;
-  };
-
   // Handle form navigation
   const nextQuestion = () => {
     const error = validateCurrentAnswer();
