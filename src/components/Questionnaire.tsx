@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 type QuestionType = {
   id: string;
   question: string;
-  type: 'text' | 'radio' | 'checkbox' | 'number';
+  type: 'text' | 'radio' | 'checkbox' | 'number' | 'email' | 'tel';
   options?: string[];
   placeholder?: string;
   required?: boolean;
@@ -24,6 +24,20 @@ const questions: QuestionType[] = [
     question: 'What is your name?',
     type: 'text',
     placeholder: 'Enter your full name',
+    required: true,
+  },
+  {
+    id: 'email',
+    question: 'What is your email address?',
+    type: 'email',
+    placeholder: 'Enter your email address',
+    required: true,
+  },
+  {
+    id: 'phone',
+    question: 'What is your phone number?',
+    type: 'tel',
+    placeholder: 'Enter your phone number',
     required: true,
   },
   {
@@ -183,6 +197,8 @@ const Questionnaire = () => {
     // Transform answers to match API interface
     const questionnaireData: QuestionnaireData = {
       name: answers.name || '',
+      email: answers.email || '',
+      phone: answers.phone || '',
       age: answers.age || 0,
       gender: answers.gender || '',
       weight: answers.weight || 0,
@@ -234,6 +250,28 @@ const Questionnaire = () => {
         return (
           <input 
             type="text"
+            value={answers[question.id] || ''}
+            onChange={(e) => handleAnswer(e.target.value)}
+            placeholder={question.placeholder}
+            className="w-full px-4 py-3 rounded-lg border border-border focus:border-wellness-500 focus:ring-2 focus:ring-wellness-200 outline-none transition-all"
+          />
+        );
+      
+      case 'email':
+        return (
+          <input 
+            type="email"
+            value={answers[question.id] || ''}
+            onChange={(e) => handleAnswer(e.target.value)}
+            placeholder={question.placeholder}
+            className="w-full px-4 py-3 rounded-lg border border-border focus:border-wellness-500 focus:ring-2 focus:ring-wellness-200 outline-none transition-all"
+          />
+        );
+      
+      case 'tel':
+        return (
+          <input 
+            type="tel"
             value={answers[question.id] || ''}
             onChange={(e) => handleAnswer(e.target.value)}
             placeholder={question.placeholder}

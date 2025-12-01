@@ -2,6 +2,8 @@
 
 export interface QuestionnaireData {
   name: string;
+  email: string;
+  phone: string;
   age: number;
   gender: string;
   weight: number;
