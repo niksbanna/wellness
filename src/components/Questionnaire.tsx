@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, Send, CheckCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Send, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import AnimatedSplash from './AnimatedSplash';
 import { useMutation } from '@tanstack/react-query';
@@ -15,6 +15,99 @@ type QuestionType = {
   options?: string[];
   placeholder?: string;
   required?: boolean;
+};
+
+// Validation helper functions
+const validateEmail = (email: string): string | null => {
+  if (!email || email.trim() === '') {
+    return 'Email is required';
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return 'Please enter a valid email address';
+  }
+  return null;
+};
+
+const validatePhone = (phone: string): string | null => {
+  if (!phone || phone.trim() === '') {
+    return 'Phone number is required';
+  }
+  // Remove all non-digit characters for validation
+  const digitsOnly = phone.replace(/\D/g, '');
+  if (digitsOnly.length < 10 || digitsOnly.length > 15) {
+    return 'Please enter a valid phone number (10-15 digits)';
+  }
+  return null;
+};
+
+const validateName = (name: string): string | null => {
+  if (!name || name.trim() === '') {
+    return 'Name is required';
+  }
+  if (name.trim().length < 2) {
+    return 'Name must be at least 2 characters';
+  }
+  if (name.trim().length > 100) {
+    return 'Name must be less than 100 characters';
+  }
+  // Check for only valid name characters (letters, spaces, hyphens, apostrophes)
+  const nameRegex = /^[a-zA-Z\s'-]+$/;
+  if (!nameRegex.test(name.trim())) {
+    return 'Name can only contain letters, spaces, hyphens, and apostrophes';
+  }
+  return null;
+};
+
+const validateAge = (age: number | string): string | null => {
+  if (age === '' || age === undefined || age === null) {
+    return 'Age is required';
+  }
+  const ageNum = typeof age === 'string' ? parseInt(age, 10) : age;
+  if (isNaN(ageNum)) {
+    return 'Please enter a valid age';
+  }
+  if (ageNum < 18) {
+    return 'You must be at least 18 years old';
+  }
+  if (ageNum > 120) {
+    return 'Please enter a valid age (up to 120 years)';
+  }
+  return null;
+};
+
+const validateWeight = (weight: number | string): string | null => {
+  if (weight === '' || weight === undefined || weight === null) {
+    return 'Weight is required';
+  }
+  const weightNum = typeof weight === 'string' ? parseFloat(weight) : weight;
+  if (isNaN(weightNum)) {
+    return 'Please enter a valid weight';
+  }
+  if (weightNum < 50) {
+    return 'Weight must be at least 50 lbs';
+  }
+  if (weightNum > 1000) {
+    return 'Weight must be less than 1000 lbs';
+  }
+  return null;
+};
+
+const validateHeight = (height: number | string): string | null => {
+  if (height === '' || height === undefined || height === null) {
+    return 'Height is required';
+  }
+  const heightNum = typeof height === 'string' ? parseFloat(height) : height;
+  if (isNaN(heightNum)) {
+    return 'Please enter a valid height';
+  }
+  if (heightNum < 24) {
+    return 'Height must be at least 24 inches (2 feet)';
+  }
+  if (heightNum > 96) {
+    return 'Height must be less than 96 inches (8 feet)';
+  }
+  return null;
 };
 
 // The questionnaire questions
@@ -102,6 +195,7 @@ const Questionnaire = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | number | string[]>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const { toast } = useToast();
 
@@ -126,7 +220,42 @@ const Questionnaire = () => {
     },
   });
 
-  // Form validation
+  // Validate the current question's answer
+  const validateCurrentAnswer = (): string | null => {
+    const question = questions[currentQuestion];
+    const answer = answers[question.id];
+
+    switch (question.id) {
+      case 'name':
+        return validateName(answer as string);
+      case 'email':
+        return validateEmail(answer as string);
+      case 'phone':
+        return validatePhone(answer as string);
+      case 'age':
+        return validateAge(answer as number | string);
+      case 'weight':
+        return validateWeight(answer as number | string);
+      case 'height':
+        return validateHeight(answer as number | string);
+      case 'gender':
+      case 'goal':
+      case 'medications':
+        if (!answer || (typeof answer === 'string' && answer.trim() === '')) {
+          return 'Please select an option';
+        }
+        return null;
+      case 'health_conditions':
+        if (!answer || !Array.isArray(answer) || answer.length === 0) {
+          return 'Please select at least one option';
+        }
+        return null;
+      default:
+        return null;
+    }
+  };
+
+  // Form validation - check if current question is answered and valid
   const isCurrentQuestionAnswered = () => {
     const question = questions[currentQuestion];
     const answer = answers[question.id];
@@ -140,19 +269,30 @@ const Questionnaire = () => {
     return answer !== undefined && answer !== '';
   };
 
+  // Check if current answer is valid (no validation errors)
+  const isCurrentAnswerValid = (): boolean => {
+    return validateCurrentAnswer() === null;
+  };
+
   // Handle form navigation
   const nextQuestion = () => {
-    if (isCurrentQuestionAnswered()) {
-      if (currentQuestion < questions.length - 1) {
-        setCurrentQuestion(currentQuestion + 1);
-      } else {
-        handleSubmit();
-      }
+    const error = validateCurrentAnswer();
+    if (error) {
+      setValidationError(error);
+      return;
+    }
+    
+    setValidationError(null);
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
+    } else {
+      handleSubmit();
     }
   };
 
   const prevQuestion = () => {
     if (currentQuestion > 0) {
+      setValidationError(null);
       setCurrentQuestion(currentQuestion - 1);
     }
   };
@@ -164,6 +304,10 @@ const Questionnaire = () => {
       ...answers,
       [question.id]: value
     });
+    // Clear validation error when user starts typing
+    if (validationError) {
+      setValidationError(null);
+    }
   };
 
   const handleCheckboxChange = (option: string) => {
@@ -190,6 +334,10 @@ const Questionnaire = () => {
       ...answers,
       [question.id]: currentAnswers
     });
+    // Clear validation error when user makes a selection
+    if (validationError) {
+      setValidationError(null);
+    }
   };
 
   // Handle form submission
@@ -244,6 +392,9 @@ const Questionnaire = () => {
   // Render the current question based on its type
   const renderQuestionInput = () => {
     const question = questions[currentQuestion];
+    const inputErrorClass = validationError 
+      ? "border-red-500 focus:border-red-500 focus:ring-red-200" 
+      : "border-border focus:border-wellness-500 focus:ring-wellness-200";
     
     switch (question.type) {
       case 'text':
@@ -253,7 +404,10 @@ const Questionnaire = () => {
             value={answers[question.id] || ''}
             onChange={(e) => handleAnswer(e.target.value)}
             placeholder={question.placeholder}
-            className="w-full px-4 py-3 rounded-lg border border-border focus:border-wellness-500 focus:ring-2 focus:ring-wellness-200 outline-none transition-all"
+            className={cn(
+              "w-full px-4 py-3 rounded-lg border focus:ring-2 outline-none transition-all",
+              inputErrorClass
+            )}
           />
         );
       
@@ -264,7 +418,10 @@ const Questionnaire = () => {
             value={answers[question.id] || ''}
             onChange={(e) => handleAnswer(e.target.value)}
             placeholder={question.placeholder}
-            className="w-full px-4 py-3 rounded-lg border border-border focus:border-wellness-500 focus:ring-2 focus:ring-wellness-200 outline-none transition-all"
+            className={cn(
+              "w-full px-4 py-3 rounded-lg border focus:ring-2 outline-none transition-all",
+              inputErrorClass
+            )}
           />
         );
       
@@ -275,7 +432,10 @@ const Questionnaire = () => {
             value={answers[question.id] || ''}
             onChange={(e) => handleAnswer(e.target.value)}
             placeholder={question.placeholder}
-            className="w-full px-4 py-3 rounded-lg border border-border focus:border-wellness-500 focus:ring-2 focus:ring-wellness-200 outline-none transition-all"
+            className={cn(
+              "w-full px-4 py-3 rounded-lg border focus:ring-2 outline-none transition-all",
+              inputErrorClass
+            )}
           />
         );
       
@@ -286,7 +446,10 @@ const Questionnaire = () => {
             value={answers[question.id] || ''}
             onChange={(e) => handleAnswer(parseInt(e.target.value, 10) || '')}
             placeholder={question.placeholder}
-            className="w-full px-4 py-3 rounded-lg border border-border focus:border-wellness-500 focus:ring-2 focus:ring-wellness-200 outline-none transition-all"
+            className={cn(
+              "w-full px-4 py-3 rounded-lg border focus:ring-2 outline-none transition-all",
+              inputErrorClass
+            )}
           />
         );
       
@@ -418,6 +581,13 @@ const Questionnaire = () => {
               
               <div className="mb-8">
                 {renderQuestionInput()}
+                {/* Validation error message */}
+                {validationError && (
+                  <div className="flex items-center gap-2 mt-2 text-red-600">
+                    <AlertCircle size={16} />
+                    <span className="text-sm">{validationError}</span>
+                  </div>
+                )}
               </div>
               
               <div className="flex justify-between">
@@ -434,11 +604,11 @@ const Questionnaire = () => {
 
                 <button
                   onClick={nextQuestion}
-                  disabled={!isCurrentQuestionAnswered() || mutation.isPending}
+                  disabled={mutation.isPending}
                   className={cn(
                     "flex items-center gap-2",
                     currentQuestion === questions.length - 1 ? "btn-primary" : "btn-primary",
-                    (!isCurrentQuestionAnswered() || mutation.isPending) && "opacity-50 cursor-not-allowed"
+                    mutation.isPending && "opacity-50 cursor-not-allowed"
                   )}
                 >
                   {mutation.isPending ? (
